@@ -1,47 +1,30 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline with SonarQube
 
 on:
   push:
     branches:
-      - master
-  pull_request:
-    branches:
-      - master
+      - main
 
 jobs:
-  build-and-test:
+  sonarcloud:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'  
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-    - name: Install dependencies
+    - name: Set up JDK 11 (for SonarScanner)
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+
+    - name: Install Node.js dependencies
       run: npm install
 
-    - name: Run tests
+    - name: Run Tests
       run: npm test
 
-  sonar-scan:
-    runs-on: ubuntu-latest
-    needs: build-and-test 
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-
-    - name: SonarQube Scan
-      run: sonar-scanner
+    - name: Run SonarQube Scanner
+      uses: SonarSource/sonarcloud-github-action@v1.4
       env:
-        SONAR_HOST_URL: http://localhost:9000 
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
